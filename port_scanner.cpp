@@ -106,6 +106,12 @@ static size_t num_of_digits(T value)
     return (count);
 }
 
+int	print_usage(void)
+{
+	std::cout << "Usage: ./scanner address ports" << std::endl;
+	return (0);
+}
+
 int main(int argc, char **argv)
 {
     std::string address;
@@ -113,6 +119,8 @@ int main(int argc, char **argv)
     std::vector<int> open_ports;
     std::vector<int> ports;
 
+    if (argc == 2)
+	return (print_usage());
     if (argc == 3)
     {
         address = argv[1];
