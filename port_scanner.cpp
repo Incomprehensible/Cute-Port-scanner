@@ -2,6 +2,8 @@
 #include <SFML/Network.hpp>
 #include <string>
 #include <sstream>
+#include <cstdlib>
+#include <iomanip>
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
 #define END "\033[0m"
@@ -80,21 +82,55 @@ static std::vector<int> get_ports(const std::string &range)
     return (ports);
 }
 
-int main()
+template <typename T>
+static T pull_maximum(std::vector<T> &vals)
+{
+    T max = vals[0];
+    for (T val : vals)
+        max = (val > max) ? val : max;
+    return max;
+}
+
+template <typename T>
+static size_t num_of_digits(T value)
+{
+    int count;
+    count = (value < 0) ? 1 : 0;
+    if (!value)
+        return (0);
+    while (value)
+    {
+        value /= 10;
+        ++count;
+    }
+    return (count);
+}
+
+int main(int argc, char **argv)
 {
     std::string address;
     std::string ports_lst;
     std::vector<int> open_ports;
     std::vector<int> ports;
-    std::cout << "Address: " << std::flush;
-    std::getline(std::cin, address);
-    std::cout << "Port: " << std::flush;
-    std::getline(std::cin, ports_lst);
-    ports = get_ports(ports_lst);
-    std::cout << "Scanning for open ports... " << std::flush;
+
+    if (argc == 3)
+    {
+        address = argv[1];
+        ports = get_ports(std::string(argv[2]));
+    }
+    else
+    {
+        std::cout << "Address: " << std::flush;
+        std::getline(std::cin, address);
+        std::cout << "Port: " << std::flush;
+        std::getline(std::cin, ports_lst);
+        ports = get_ports(ports_lst);
+    }
+    std::cout << "Scanning for open ports... \n" << std::flush;
+    size_t width = num_of_digits(pull_maximum(ports));
     for (int port : ports)
     {
-        std::cout << "Port " << port << " at address " << address << " is ";
+        std::cout << "Port " << std::setw(width) << port << " at address " << address << " is ";
         if (port_open(address, port))
         {
             std::cout << GREEN << "OPEN" << END << std::endl;
@@ -106,10 +142,10 @@ int main()
     if (!open_ports.empty())
     {
         if (open_ports.size() == 1)
-            std::cout << GREEN << "Open port found: " << open_ports[0] << END << std::endl;
+            std::cout << GREEN << "\nOpen port found: " << open_ports[0] << END << std::endl;
         else
         {
-            std::cout << GREEN << "Open ports found: " ;
+            std::cout << GREEN << "\nOpen ports found: " ;
             for (const int opport : open_ports)
             {
                 std::cout << opport;
@@ -120,7 +156,7 @@ int main()
         }
     }
     else
-        std::cout << RED << "No open ports found." << END << std::endl;
+        std::cout << RED << "\nNo open ports found." << END << std::endl;
     std::cout << std::flush;
     return (0);
 }
